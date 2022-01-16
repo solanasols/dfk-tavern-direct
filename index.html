@@ -136,6 +136,21 @@
  
     <div class="row">
       <div>
+        <h3 class="sub-header">View Single Hero</h3>
+        <form class="form-inline" role="form">
+          <table>
+            <tr>
+              <td><label for="single">Hero ID #</label></td>
+              <td><input id="single"></td>
+            </tr>
+          </table>
+          <a href="#" onclick="EntryPoint.getSingleHero()" class="btn btn-primary">Check</a>
+        </form>
+      </div>
+      <div id="singleresult"></div>
+    </div>
+    <div class="row">
+      <div>
         <h3 class="sub-header">Buy Hero</h3>
         <form class="form-inline" role="form">
           <table>
@@ -159,7 +174,7 @@
               <td>(since this is client side only, we will never see your secret phrase. However, if you feel uncomfortable with this, please download the source from GitHub and run this locally on your computer or wait until I have time to implement a Metamask integration.</td>
             </tr>
           </table>
-          <a href="#" onclick="EntryPoint.buyHero()" class="btn btn-primary">Get</a>
+          <a href="#" onclick="EntryPoint.buyHero()" class="btn btn-primary">Buy</a>
           <div class="form-group">
             <table>
               <tr>
