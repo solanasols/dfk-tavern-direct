@@ -124,7 +124,7 @@ export function queryHeroes() {
     getHeroIds(query)
     .then(async ids => {
       for await (const hero of getHeroes(ids, maxPrice)) {
-        document.getElementById('result').innerHTML += `Found Hero ${hero.heroId} at price ${hero.price}! Details: ${JSON.stringify(hero.hero)}<br />`;
+        document.getElementById('result').innerHTML += `Found Hero ${hero.heroId} at price ${hero.price}! Details: StartedAt: ${hero.auction.startedAt}, StartingPrice: ${hero.auction.startingPrice} JEWEL-WEI, EndingPrice: ${hero.auction.endingPrice} JEWEL-WEI, Class: ${hero.hero.info.class}, SubClass: ${hero.hero.info.subClass}, Generation: ${hero.hero.info.generation}, Rarity: ${hero.hero.info.rarity}, Mining: ${hero.hero.professions.mining}, Gardening: ${hero.hero.professions.gardening}, Foraging: ${hero.hero.professions.foraging}, Fishing: ${hero.hero.professions.fishing}, STR: ${hero.hero.stats.strength}, END: ${hero.hero.stats.endurance}, VIT: ${hero.hero.stats.vitality}, WIS: ${hero.hero.stats.wisdom}, DEX: ${hero.hero.stats.dexterity}, INT: ${hero.hero.stats.intelligence}, AGI: ${hero.hero.stats.agility}, LUC: ${hero.hero.stats.luck}, HP: ${hero.hero.stats.hp}, MP: ${hero.hero.stats.mp}, stam: ${hero.hero.stats.stamina}, level: ${hero.hero.state.level}, xp: ${hero.hero.state.xp}, parents: ${hero.hero.summoningInfo.summonerId}, ${hero.hero.summoningInfo.assistantId}, Summons: ${hero.hero.summoningInfo.summons} / ${hero.hero.summoningInfo.maxSummons}<br />`;
       }
       document.getElementById('result').innerHTML += "Finished";
     });
