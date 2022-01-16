@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A direct way to access the DefiKingdoms query without having to wait for the full 3 day sync interval",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "npx webpack && gh-pages -d dist"
   },
   "repository": {
     "type": "git",
