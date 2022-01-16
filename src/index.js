@@ -26,7 +26,7 @@ async function getHeroIdsBatch(where, client, offset) {
 	return await querySingleRpcWithRetry(async () => client.request(query), 3);
 }
 
-async function getHeroIds(where) 
+async function* getHeroIds(where) 
 {
 	const endpoint = 'https://graph2.defikingdoms.com/subgraphs/name/defikingdoms/apiv5'
 
@@ -37,17 +37,16 @@ async function getHeroIds(where)
 	})
 
   let offset = 0;
-  let result = [];
-  let last = 0;
-	do {
-    const r = await getHeroIdsBatch(where, graphQLClient, offset);
+  let last = 1000;
+  let handle = getHeroIdsBatch(where, graphQLClient, offset);
+	while (!!handle) {
+    const r = await handle;
     offset += 1000;
-    const ids = r.heros.map(h => h.id);
-    result = result.concat(ids);
+    const ids = r?.heros?.map(h => h.id);
     last = ids.length;
+    if (last === 1000) { handle = getHeroIdsBatch(where, graphQLClient, offset); }
+    yield ids;
   }
-  while (last === 1000);
-  return result;
 }
 
 async function* queryListRpcWithRetry(list, query, batchSize, retries = 3) {
@@ -96,8 +95,8 @@ async function* getHeroes(list, maxPrice) {
   for await (const heroId of queryListRpcWithRetry(list, id => auctionContract.methods.isOnAuction(id).call().then(onAuction => onAuction ? id : null), 10, 3)) {
     try {
       const auction = await querySingleRpcWithRetry(auctionContract.methods.getAuction(heroId).call, 5);
-      const price = Number.parseInt(auction.startingPrice.substring(0, auction.startingPrice.length - 15), 10);
-      if (price <= maxPrice * 1000) {
+      const price = Number.parseInt(auction.startingPrice.substring(0, auction.startingPrice.length - 15), 10) / 1000.0;
+      if (price <= maxPrice) {
         const hero = await querySingleRpcWithRetry(heroContract.methods.getHero(heroId).call, 5);
         yield {
           heroId,
@@ -113,6 +112,20 @@ async function* getHeroes(list, maxPrice) {
   }
 }
 
+async function queryHeroesAsync(query, maxPrice) {
+  try {
+    for await (const ids of getHeroIds(query)) {
+      for await (const hero of getHeroes(ids, maxPrice)) {
+        document.getElementById('result').innerHTML += `Found Hero ${hero.heroId} at price ${hero.price}! Details: StartedAt: ${hero.auction.startedAt}, StartingPrice: ${hero.auction.startingPrice} JEWEL-WEI, EndingPrice: ${hero.auction.endingPrice} JEWEL-WEI, Class: ${hero.hero.info.class}, SubClass: ${hero.hero.info.subClass}, Generation: ${hero.hero.info.generation}, Rarity: ${hero.hero.info.rarity}, Mining: ${hero.hero.professions.mining}, Gardening: ${hero.hero.professions.gardening}, Foraging: ${hero.hero.professions.foraging}, Fishing: ${hero.hero.professions.fishing}, STR: ${hero.hero.stats.strength}, END: ${hero.hero.stats.endurance}, VIT: ${hero.hero.stats.vitality}, WIS: ${hero.hero.stats.wisdom}, DEX: ${hero.hero.stats.dexterity}, INT: ${hero.hero.stats.intelligence}, AGI: ${hero.hero.stats.agility}, LUC: ${hero.hero.stats.luck}, HP: ${hero.hero.stats.hp}, MP: ${hero.hero.stats.mp}, stam: ${hero.hero.stats.stamina}, level: ${hero.hero.state.level}, xp: ${hero.hero.state.xp}, parents: ${hero.hero.summoningInfo.summonerId}, ${hero.hero.summoningInfo.assistantId}, Summons: ${hero.hero.summoningInfo.summons} / ${hero.hero.summoningInfo.maxSummons}<br />`;
+      }
+      document.getElementById('result').innerHTML += "Finished";
+    }
+  }
+  catch (e) {
+    document.getElementById('result').innerHTML += e;
+  }
+}
+
 export function queryHeroes() {
   document.getElementById('result').innerHTML = "Starting query<br />";
   const maxPrice = $("#maxprice").val();
@@ -120,19 +133,8 @@ export function queryHeroes() {
     .filter(x => x[0]?.length > 0 && x[1]?.length > 0)
     .map(x => `${x[0]}: ${["mainClass", "subClass", "profession", "statBoost1", "statBoost2"].includes(x[0]) ? `"${x[1]}"` : x[1]}`)
     .join("\n");
-  try {
-    getHeroIds(query)
-    .then(async ids => {
-      for await (const hero of getHeroes(ids, maxPrice)) {
-        document.getElementById('result').innerHTML += `Found Hero ${hero.heroId} at price ${hero.price}! Details: StartedAt: ${hero.auction.startedAt}, StartingPrice: ${hero.auction.startingPrice} JEWEL-WEI, EndingPrice: ${hero.auction.endingPrice} JEWEL-WEI, Class: ${hero.hero.info.class}, SubClass: ${hero.hero.info.subClass}, Generation: ${hero.hero.info.generation}, Rarity: ${hero.hero.info.rarity}, Mining: ${hero.hero.professions.mining}, Gardening: ${hero.hero.professions.gardening}, Foraging: ${hero.hero.professions.foraging}, Fishing: ${hero.hero.professions.fishing}, STR: ${hero.hero.stats.strength}, END: ${hero.hero.stats.endurance}, VIT: ${hero.hero.stats.vitality}, WIS: ${hero.hero.stats.wisdom}, DEX: ${hero.hero.stats.dexterity}, INT: ${hero.hero.stats.intelligence}, AGI: ${hero.hero.stats.agility}, LUC: ${hero.hero.stats.luck}, HP: ${hero.hero.stats.hp}, MP: ${hero.hero.stats.mp}, stam: ${hero.hero.stats.stamina}, level: ${hero.hero.state.level}, xp: ${hero.hero.state.xp}, parents: ${hero.hero.summoningInfo.summonerId}, ${hero.hero.summoningInfo.assistantId}, Summons: ${hero.hero.summoningInfo.summons} / ${hero.hero.summoningInfo.maxSummons}<br />`;
-      }
-      document.getElementById('result').innerHTML += "Finished";
-    });
-  }
-  catch(e) {
-    document.getElementById('result').innerHTML += e;
-  }
-  finally {}
+    
+  queryHeroesAsync(query, maxPrice);
 }
 
 async function buyHeroAsync(provider, heroId, userAddress, priceInWei) {
