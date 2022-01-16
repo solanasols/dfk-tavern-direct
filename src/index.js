@@ -23,7 +23,7 @@ async function getHeroIdsBatch(where, client, offset) {
     }
   }`;
 
-	return await client.request(query).catch((error) => console.error(error));
+	return await querySingleRpcWithRetry(async () => client.request(query), 3);
 }
 
 async function getHeroIds(where) 
