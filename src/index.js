@@ -44,7 +44,7 @@ async function* getHeroIds(where)
     offset += 1000;
     const ids = r?.heros?.map(h => h.id);
     last = ids.length;
-    if (last === 1000) { handle = getHeroIdsBatch(where, graphQLClient, offset); }
+    handle = last === 1000 ? getHeroIdsBatch(where, graphQLClient, offset) : null;
     yield ids;
   }
 }
@@ -118,11 +118,13 @@ async function queryHeroesAsync(query, maxPrice) {
       for await (const hero of getHeroes(ids, maxPrice)) {
         document.getElementById('result').innerHTML += `Found Hero ${hero.heroId} at price ${hero.price}! Details: StartedAt: ${hero.auction.startedAt}, StartingPrice: ${hero.auction.startingPrice} JEWEL-WEI, EndingPrice: ${hero.auction.endingPrice} JEWEL-WEI, Class: ${hero.hero.info.class}, SubClass: ${hero.hero.info.subClass}, Generation: ${hero.hero.info.generation}, Rarity: ${hero.hero.info.rarity}, Mining: ${hero.hero.professions.mining}, Gardening: ${hero.hero.professions.gardening}, Foraging: ${hero.hero.professions.foraging}, Fishing: ${hero.hero.professions.fishing}, STR: ${hero.hero.stats.strength}, END: ${hero.hero.stats.endurance}, VIT: ${hero.hero.stats.vitality}, WIS: ${hero.hero.stats.wisdom}, DEX: ${hero.hero.stats.dexterity}, INT: ${hero.hero.stats.intelligence}, AGI: ${hero.hero.stats.agility}, LUC: ${hero.hero.stats.luck}, HP: ${hero.hero.stats.hp}, MP: ${hero.hero.stats.mp}, stam: ${hero.hero.stats.stamina}, level: ${hero.hero.state.level}, xp: ${hero.hero.state.xp}, parents: ${hero.hero.summoningInfo.summonerId}, ${hero.hero.summoningInfo.assistantId}, Summons: ${hero.hero.summoningInfo.summons} / ${hero.hero.summoningInfo.maxSummons}<br />`;
       }
-      document.getElementById('result').innerHTML += "Finished";
     }
   }
   catch (e) {
     document.getElementById('result').innerHTML += e;
+  }
+  finally {
+    document.getElementById('result').innerHTML += "Finished";
   }
 }
 
@@ -148,6 +150,34 @@ async function buyHeroAsync(provider, heroId, userAddress, priceInWei) {
   catch(e) {
     document.getElementById("buyResult").innerHTML = e;
   }
+}
+
+async function getSingleHeroAsync(id) {
+  const web3 = new Web3(new Web3.providers.HttpProvider("https://api.harmony.one"));
+  const heroContract = new web3.eth.Contract(dfkHeroABI, dfkHeroAddress);
+  const auctionContract = new web3.eth.Contract(dfkHeroAuction, dfkHeroAuctionAddress);
+
+  try {
+    const isOnAuction = await querySingleRpcWithRetry(auctionContract.methods.isOnAuction(id).call, 5);
+    if (isOnAuction) {
+      const auction = await querySingleRpcWithRetry(auctionContract.methods.getAuction(id).call, 5);
+      const price = Number.parseInt(auction.startingPrice.substring(0, auction.startingPrice.length - 15), 10) / 1000.0;
+      const hero = await querySingleRpcWithRetry(heroContract.methods.getHero(id).call, 5);
+      document.getElementById('singleresult').innerHTML = `Hero ${id} is on auction at price ${price}! Details: StartedAt: ${auction.startedAt}, StartingPrice: ${auction.startingPrice} JEWEL-WEI, EndingPrice: ${auction.endingPrice} JEWEL-WEI, Class: ${hero.info.class}, SubClass: ${hero.info.subClass}, Generation: ${hero.info.generation}, Rarity: ${hero.info.rarity}, Mining: ${hero.professions.mining}, Gardening: ${hero.professions.gardening}, Foraging: ${hero.professions.foraging}, Fishing: ${hero.professions.fishing}, STR: ${hero.stats.strength}, END: ${hero.stats.endurance}, VIT: ${hero.stats.vitality}, WIS: ${hero.stats.wisdom}, DEX: ${hero.stats.dexterity}, INT: ${hero.stats.intelligence}, AGI: ${hero.stats.agility}, LUC: ${hero.stats.luck}, HP: ${hero.stats.hp}, MP: ${hero.stats.mp}, stam: ${hero.stats.stamina}, level: ${hero.state.level}, xp: ${hero.state.xp}, parents: ${hero.summoningInfo.summonerId}, ${hero.summoningInfo.assistantId}, Summons: ${hero.summoningInfo.summons} / ${hero.summoningInfo.maxSummons}<br />`;
+    }
+    else {
+      const hero = await querySingleRpcWithRetry(heroContract.methods.getHero(id).call, 5);
+      document.getElementById('singleresult').innerHTML = `Hero ${id} is not on auction! Details: Class: ${hero.info.class}, SubClass: ${hero.info.subClass}, Generation: ${hero.info.generation}, Rarity: ${hero.info.rarity}, Mining: ${hero.professions.mining}, Gardening: ${hero.professions.gardening}, Foraging: ${hero.professions.foraging}, Fishing: ${hero.professions.fishing}, STR: ${hero.stats.strength}, END: ${hero.stats.endurance}, VIT: ${hero.stats.vitality}, WIS: ${hero.stats.wisdom}, DEX: ${hero.stats.dexterity}, INT: ${hero.stats.intelligence}, AGI: ${hero.stats.agility}, LUC: ${hero.stats.luck}, HP: ${hero.stats.hp}, MP: ${hero.stats.mp}, stam: ${hero.stats.stamina}, level: ${hero.state.level}, xp: ${hero.state.xp}, parents: ${hero.summoningInfo.summonerId}, ${hero.summoningInfo.assistantId}, Summons: ${hero.summoningInfo.summons} / ${hero.summoningInfo.maxSummons}<br />`;
+    }
+  }
+  catch (e) {
+    document.getElementById("singleresult").innerHTML = e;
+  }
+}
+
+export function getSingleHero() {
+  const id = $("#single").val();
+  getSingleHeroAsync(id);
 }
 
 export function buyHero() {
