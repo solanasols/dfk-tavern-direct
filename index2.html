@@ -158,23 +158,12 @@
         <form class="form-inline" role="form">
           <table>
             <tr>
-              <td><label for="address">Your Wallet Address</label></td>
-              <td><input id="address"></td>
-            </tr>
-            <tr>
               <td><label for="price">Price of the Hero in Wei (for example 40 JEWEL = 40000000000000000000)</label></td>
               <td><input id="price"></td>
             </tr>
             <tr>
               <td><label for="heroid">Hero ID</label></td>
               <td><input id="heroid"></td>
-            </tr>
-            <tr>
-              <td><label for="secret">Your secret phrase</label></td>
-              <td><input id="secret"></td>
-            </tr>
-            <tr>
-              <td>(since this is client side only, we will never see your secret phrase. However, if you feel uncomfortable with this, please download the source from GitHub and run this locally on your computer or wait until I have time to implement a Metamask integration.</td>
             </tr>
           </table>
           <a href="#" onclick="EntryPoint.buyHero()" class="btn btn-primary">Buy</a>
