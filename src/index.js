@@ -1,6 +1,5 @@
 import Web3 from "web3";
 import { GraphQLClient, gql } from 'graphql-request';
-//import HDWalletProvider from "@truffle/hdwallet-provider";
 import detectEthereumProvider from '@metamask/detect-provider';
 
 import dfkHeroABI from "../dfkHeroABI.json";
@@ -209,16 +208,8 @@ export function getSingleHero() {
 
 export function buyHero() {
   const id = $("#heroid").val();
-  //const secret = $("#secret").val();
-  //const userAddress = $('#address').val();
   const priceInWei = $('#price').val();
 
   document.getElementById('buyResult').innerHTML = `Buying hero ${id} at price of ${priceInWei}`;
-/*  const provider = new HDWalletProvider({
-    mnemonic: {
-      phrase: secret
-    },
-    providerOrUrl: "https://api.harmony.one"
-  });*/
   buyHeroAsync(id, priceInWei)
 }

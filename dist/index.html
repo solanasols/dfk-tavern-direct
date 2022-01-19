@@ -5,16 +5,182 @@
   
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
   </head>
-  <body>
-    <div>
-      <p>After having a talk with some community devs: I have taken this tool offline as in order for the "buy hero" feature to work one needs to sign a transaction, for which one needs the private key of the user's wallet.
-      The preferred way of doing that would be a full Metamask integration, for which I unfortunately don't have time.
-      I could modify the page to run without that feature, but it plain and simply won't make much sense - as the few buyable heroes usually don't show up in the tavern - so no, you cannot go and use the site to find that one buyable hero listed in the tavern (unless you are looking for a way overpriced hero), because everyboday already bought all heroes that show up there that are priced nicely.</p>
-      <p>Thus:</p>
-      <p>If you are a developer: You can find the source code at: https://github.com/solanasols/dfk-tavern-direct</p>
-      <p>Read through the code (it is short enough) and if you decide (for yourself) that everything is fine - open ./dist/index2.html to run it (if you modify something in the index.js, run npm i and npx webpack)</p>
-      <p>And: As before: This is a simple offering trying to help you out. I wrote this originally for myself and myself only (and in the future I will not do frontends anymore, either you are a coder and know to run an app in Visual Studio Code yourself or, well, bad luck for you).</p>
-      <p>So: DISCLAIMER: This app/repo is provided as is. Please use at your own risk! (We will not be liable for any bugs, errors etc.)</p>
+ 
+  <body class="container"> 
+
+    <script src="main.js"></script>   
+    <h1 class="page-header">Query DFK Tavern</h1>
+    <div>Welcome traveler! We have the newest info on DFK Hero auctions available. Search for interesting heroes that are currently on auction, check the status of a specific hero or buy a hero (you need its exact price and id) regardless of whether the DFK tavern shows the hero on sale or not.</div>
+    <div>Update: Now with MetaMask support, so you can feel more comfortable with using this site.</div>
+    <div>DISCLAIMER: This app is provided as is. <b>Please use at your own risk!</b> (We will not be liable for any bugs, errors etc.)</div>
+    <div><b>If you like this project and would like to see improvements, please consider supporting future developments with a donation to 0x0dB6778807f5Df9feEe087E4600b970eFE3b46F8</b></div>
+    <div class="row">
+      <div>
+        <h3 class="sub-header">Filters (use as many as possible to reduce query time!)</h3>
+        <div>Please try to restrict the number of possible results by using appropriate filters. For example: Filtering on rarity=1 and summons_gte 3 needs roughtly 30 minutes. So please be patient and use filters! BTW: gte stands for greater-than-or-equal, lte stands for less-than-or-equal</div>
+        <form class="form-inline" role="form">
+          <div class="form-group">
+            <table>
+              <tr>
+                <td><label for="maxprice">Max JEWEL Price</label></td>
+                <td><input id="maxprice"></td>
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter0property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter0value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter1property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter1value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter2property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter2value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter3property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter3value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter4property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter4value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter5property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter5value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter6property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter6value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter7property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter7value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter8property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter8value">
+                </td>                          
+              </tr>
+              <tr>
+                <td>
+                  <input list="qraphqlfilters" id="filter9property">
+                </td>
+                <td>
+                  <input class="form-control" id="filter9value">
+                </td>                          
+              </tr>
+            </table>
+            <datalist id="qraphqlfilters">
+              <option value="mainClass">
+              <option value="subClass">
+              <option value="profession">
+              <option value="statBoost1">
+              <option value="statBoost2">
+              <option value="rarity">
+              <option value="generation_lte">
+              <option value="fishinig_gte">
+              <option value="mining_gte">
+              <option value="gardening_gte">
+              <option value="foraging_gte">
+              <option value="strength_gte">
+              <option value="dexterity_gte">
+              <option value="endurance_gte">
+              <option value="agility_gte">
+              <option value="wisdom_gte">
+              <option value="intelligence_gte">
+              <option value="vitality_gte">
+              <option value="luck_gte">
+              <option value="level_gte">
+              <option value="summons_gte">
+              <option value="maxSummons_gte">
+            </datalist>
+          </div>
+          <a href="#" onclick="EntryPoint.queryHeroes()" class="btn btn-primary">Query</a>
+        </form>
+      </div>
+      <div id="result">
+      </div>
+    </div>    
+ 
+    <div class="row">
+      <div>
+        <h3 class="sub-header">View Single Hero</h3>
+        <form class="form-inline" role="form">
+          <table>
+            <tr>
+              <td><label for="single">Hero ID #</label></td>
+              <td><input id="single"></td>
+            </tr>
+          </table>
+          <a href="#" onclick="EntryPoint.getSingleHero()" class="btn btn-primary">Check</a>
+        </form>
+      </div>
+      <div id="singleresult"></div>
     </div>
+    <div class="row">
+      <div>
+        <h3 class="sub-header">Buy Hero</h3>
+        <form class="form-inline" role="form">
+          <table>
+            <tr>
+              <td><label for="price">Price of the Hero in Wei (for example 40 JEWEL = 40000000000000000000)</label></td>
+              <td><input id="price"></td>
+            </tr>
+            <tr>
+              <td><label for="heroid">Hero ID</label></td>
+              <td><input id="heroid"></td>
+            </tr>
+          </table>
+          <a href="#" onclick="EntryPoint.buyHero()" class="btn btn-primary">Buy</a>
+          <div class="form-group">
+            <table>
+              <tr>
+                <td>Result:</td>
+                <td>
+                  <div id="buyResult">
+                </td>                          
+              </tr>
+            </table>
+          </div>                
+        </form>
+      </div>
+    </div>
+    <div></div>
   </body>
 </html>
