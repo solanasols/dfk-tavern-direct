@@ -24,10 +24,11 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
     "@truffle/hdwallet-provider": "^2.0.0",
     "graphql": "^16.2.0",
     "graphql-request": "^3.7.0",
     "node-polyfill-webpack-plugin": "^1.1.4",
-    "web3": "^1.6.1"
+    "web3": "^1.7.0"
   }
 }

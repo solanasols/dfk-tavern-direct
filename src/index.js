@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import { GraphQLClient, gql } from 'graphql-request';
-import HDWalletProvider from "@truffle/hdwallet-provider";
-
+//import HDWalletProvider from "@truffle/hdwallet-provider";
+import detectEthereumProvider from '@metamask/detect-provider';
 
 import dfkHeroABI from "../dfkHeroABI.json";
 const dfkHeroAddress = "0x5f753dcdf9b1ad9aabc1346614d1f4746fd6ce5c";
@@ -139,7 +139,34 @@ export function queryHeroes() {
   queryHeroesAsync(query, maxPrice);
 }
 
-async function buyHeroAsync(provider, heroId, userAddress, priceInWei) {
+async function buyHeroAsync(heroId, priceInWei) {
+  const provider = await detectEthereumProvider();
+
+  // @ts-ignore
+  if (provider !== window.ethereum) {
+    console.error('Do you have multiple wallets installed?');
+    return;
+  }
+
+  if (!provider || provider.isMetaMask !== true) {
+    console.error('Metamask not found');
+    throw new Error("Metamask not found");
+  }
+
+  const chainId = await provider.request({ method: 'eth_chainId' });
+  if (![1666600000, 1666600001, 1666600002, 1666600003].includes(chainId)) {
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x63564c40' }],
+    });
+  }
+
+  const accounts = provider.request({ method: 'eth_requestAccounts' });
+  if (accounts.length === 0) {
+    throw new Error("Wallet has no accounts");
+  }
+  const userAddress = accounts[0];
+
   const web3 = new Web3(provider);
   const auctionContract = new web3.eth.Contract(dfkHeroAuction, dfkHeroAuctionAddress);
   try {
@@ -182,16 +209,16 @@ export function getSingleHero() {
 
 export function buyHero() {
   const id = $("#heroid").val();
-  const secret = $("#secret").val();
-  const userAddress = $('#address').val();
+  //const secret = $("#secret").val();
+  //const userAddress = $('#address').val();
   const priceInWei = $('#price').val();
 
-  document.getElementById('buyResult').innerHTML = `Buying hero ${id} for ${userAddress} at price of ${priceInWei} with wallet ${secret}`;
-  const provider = new HDWalletProvider({
+  document.getElementById('buyResult').innerHTML = `Buying hero ${id} at price of ${priceInWei}`;
+/*  const provider = new HDWalletProvider({
     mnemonic: {
       phrase: secret
     },
     providerOrUrl: "https://api.harmony.one"
-  });
-  buyHeroAsync(provider, id, userAddress, priceInWei)
+  });*/
+  buyHeroAsync(id, priceInWei)
 }
