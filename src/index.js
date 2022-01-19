@@ -145,7 +145,7 @@ async function buyHeroAsync(heroId, priceInWei) {
   // @ts-ignore
   if (provider !== window.ethereum) {
     console.error('Do you have multiple wallets installed?');
-    return;
+    throw new Error("Do you have multiple wallets installed?");
   }
 
   if (!provider || provider.isMetaMask !== true) {
@@ -155,13 +155,13 @@ async function buyHeroAsync(heroId, priceInWei) {
 
   const chainId = await provider.request({ method: 'eth_chainId' });
   if (![1666600000, 1666600001, 1666600002, 1666600003].includes(chainId)) {
-    await provider.request({
+    const x = await provider.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0x63564c40' }],
     });
   }
 
-  const accounts = provider.request({ method: 'eth_requestAccounts' });
+  const accounts = await provider.request({ method: 'eth_requestAccounts' });
   if (accounts.length === 0) {
     throw new Error("Wallet has no accounts");
   }
