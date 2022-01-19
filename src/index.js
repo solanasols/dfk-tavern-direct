@@ -197,7 +197,7 @@ async function getSingleHeroAsync(id) {
     }
   }
   catch (e) {
-    document.getElementById("singleresult").innerHTML = e;
+    document.getElementById("singleresult").innerHTML = e?.receipt?.message ?? e?.message ?? JSON.stringify(e);
   }
 }
 
