@@ -174,7 +174,7 @@ async function buyHeroAsync(heroId, priceInWei) {
     document.getElementById("buyResult").innerHTML = `Blockchain returned: "${result}" - if this is a long hexadecimal number, this should be your transaction id`;
   }
   catch(e) {
-    document.getElementById("buyResult").innerHTML = e.message;
+    document.getElementById("buyResult").innerHTML = e?.receipt?.message ?? e?.message ?? JSON.stringify(e);
   }
 }
 
@@ -197,7 +197,7 @@ async function getSingleHeroAsync(id) {
     }
   }
   catch (e) {
-    document.getElementById("singleresult").innerHTML = e?.receipt?.message ?? e?.message ?? JSON.stringify(e);
+    document.getElementById("singleresult").innerHTML = e;
   }
 }
 
