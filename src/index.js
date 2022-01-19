@@ -139,42 +139,42 @@ export function queryHeroes() {
 }
 
 async function buyHeroAsync(heroId, priceInWei) {
-  const provider = await detectEthereumProvider();
-
-  // @ts-ignore
-  if (provider !== window.ethereum) {
-    console.error('Do you have multiple wallets installed?');
-    throw new Error("Do you have multiple wallets installed?");
-  }
-
-  if (!provider || provider.isMetaMask !== true) {
-    console.error('Metamask not found');
-    throw new Error("Metamask not found");
-  }
-
-  const chainId = await provider.request({ method: 'eth_chainId' });
-  if (![1666600000, 1666600001, 1666600002, 1666600003].includes(chainId)) {
-    const x = await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x63564c40' }],
-    });
-  }
-
-  const accounts = await provider.request({ method: 'eth_requestAccounts' });
-  if (accounts.length === 0) {
-    throw new Error("Wallet has no accounts");
-  }
-  const userAddress = accounts[0];
-
-  const web3 = new Web3(provider);
-  const auctionContract = new web3.eth.Contract(dfkHeroAuction, dfkHeroAuctionAddress);
   try {
+    const provider = await detectEthereumProvider();
+
+    // @ts-ignore
+    if (provider !== window.ethereum) {
+      console.error('Do you have multiple wallets installed?');
+      throw new Error("Do you have multiple wallets installed?");
+    }
+
+    if (!provider || provider.isMetaMask !== true) {
+      console.error('Metamask not found');
+      throw new Error("Metamask not found");
+    }
+
+    const chainId = await provider.request({ method: 'eth_chainId' });
+    if (![1666600000, 1666600001, 1666600002, 1666600003].includes(chainId)) {
+      const x = await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x63564c40' }],
+      });
+    }
+
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    if (accounts.length === 0) {
+      throw new Error("Wallet has no accounts");
+    }
+    const userAddress = accounts[0];
+
+    const web3 = new Web3(provider);
+    const auctionContract = new web3.eth.Contract(dfkHeroAuction, dfkHeroAuctionAddress);
     const result = await auctionContract.methods.bid(heroId, priceInWei) // 40 JEWEL = "40000000000000000000" //web3.utils.toWei("40", 'ether')
       .send({from: userAddress, gas: 500000, gasPrice: '1890000000000'});
-    document.getElementById("buyResult").innerHTML = result;
+    document.getElementById("buyResult").innerHTML = `Blockchain returned: "${result}" - if this is a long hexadecimal number, this should be your transaction id`;
   }
   catch(e) {
-    document.getElementById("buyResult").innerHTML = e;
+    document.getElementById("buyResult").innerHTML = e.message;
   }
 }
 
